@@ -21,9 +21,7 @@ package org.apache.kudu.flume.sink;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -45,98 +43,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 /**
- * A regular expression operations producer that generates one or more Kudu
+ * A splitter operations producer that generates one or more Kudu
  * {@link Insert} or {@link Upsert} operations per Flume {@link Event} by
- * parsing the event {@code body} using a regular expression. Values are coerced
+ * parsing the event {@code body} using a splitter. Values are coerced
  * to the types of the named columns in the Kudu table.
- *
- * <p>
- * Example: If the Kudu table has the schema:
- *
- * <pre>
- * key INT32
- * name STRING
- * </pre>
- *
- * <p>
- * and {@code producer.pattern = (?<key>\\d+),(?<name>\\w+)} then
- * {@code RegexpKuduOperationsProducer} will parse the string:
- *
- * <pre>
- * |12345,Mike||54321,Todd|
- * </pre>
- *
- * into the rows: {@code (key=12345, name=Mike)} and
- * {@code (key=54321, name=Todd)}.
- *
- * <p>
- * Note: This class relies on JDK7 named capturing groups, which are documented
- * in {@link Pattern}. The name of each capturing group must correspond to a
- * column name in the destination Kudu table.
- *
- * <p>
- * <strong><code>RegexpKuduOperationsProducer</code> Flume Configuration
- * Parameters</strong>
- * </p>
- *
- * <table cellpadding=3 cellspacing=0 border=1 summary="Flume Configuration
- * Parameters">
- * <tr>
- * <th>Property Name</th>
- * <th>Default</th>
- * <th>Required?</th>
- * <th>Description</th>
- * </tr>
- * <tr>
- * <td>producer.pattern</td>
- * <td></td>
- * <td>Yes</td>
- * <td>The regular expression used to parse the event body.</td>
- * </tr>
- * <tr>
- * <td>producer.charset</td>
- * <td>utf-8</td>
- * <td>No</td>
- * <td>The character set of the event body.</td>
- * </tr>
- * <tr>
- * <td>producer.operation</td>
- * <td>upsert</td>
- * <td>No</td>
- * <td>Operation type used to write the event to Kudu. Must be either
- * {@code insert} or {@code upsert}.</td>
- * </tr>
- * <tr>
- * <td>producer.skipMissingColumn</td>
- * <td>false</td>
- * <td>No</td>
- * <td>What to do if a column in the Kudu table has no corresponding capture
- * group. If set to {@code true}, a warning message is logged and the operation
- * is still attempted. If set to {@code false}, an exception is thrown and the
- * sink will not process the {@code Event}, causing a Flume {@code Channel}
- * rollback.
- * </tr>
- * <tr>
- * <td>producer.skipBadColumnValue</td>
- * <td>false</td>
- * <td>No</td>
- * <td>What to do if a value in the pattern match cannot be coerced to the
- * required type. If set to {@code true}, a warning message is logged and the
- * operation is still attempted. If set to {@code false}, an exception is thrown
- * and the sink will not process the {@code Event}, causing a Flume
- * {@code Channel} rollback.
- * </tr>
- * <tr>
- * <td>producer.warnUnmatchedRows</td>
- * <td>true</td>
- * <td>No</td>
- * <td>Whether to log a warning about payloads that do not match the pattern. If
- * set to {@code false}, event bodies with no matches will be silently
- * dropped.</td>
- * </tr>
- * </table>
- *
- * @see Pattern
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
